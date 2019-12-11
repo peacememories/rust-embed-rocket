@@ -9,3 +9,6 @@ edition = "2018"
 [dependencies]
 rust-embed = "5.2.0"
 rocket = "0.4.2"
+
+[features]
+index = []
