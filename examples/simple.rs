@@ -7,7 +7,5 @@ use rust_embed::RustEmbed;
 struct Asset;
 
 fn main() {
-    rocket::ignite()
-        .mount("/asdf", Server::from(Asset))
-        .launch();
+    rocket::ignite().mount("/", Server::from(Asset)).launch();
 }
