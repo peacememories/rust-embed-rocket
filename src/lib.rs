@@ -12,7 +12,7 @@ use rust_embed::RustEmbed;
 use std::marker::PhantomData;
 use std::path::PathBuf;
 
-pub struct Server<T: RustEmbed + 'static> {
+pub struct Server<T: RustEmbed> {
     tag: PhantomData<fn(T)>,
 }
 
@@ -32,7 +32,7 @@ impl<T: RustEmbed> Clone for Server<T> {
     }
 }
 
-impl<T: RustEmbed> Handler for Server<T> {
+impl<T: RustEmbed + 'static> Handler for Server<T> {
     fn handle<'r>(&self, request: &'r Request, _data: Data) -> Outcome<'r> {
         let segments_option = request
             .get_segments(0)
@@ -54,7 +54,7 @@ impl<T: RustEmbed> Handler for Server<T> {
     }
 }
 
-impl<T: RustEmbed> Into<Vec<Route>> for Server<T> {
+impl<T: RustEmbed + 'static> Into<Vec<Route>> for Server<T> {
     fn into(self) -> Vec<Route> {
         vec![Route::new(Method::Get, "/<path..>", self)]
     }
