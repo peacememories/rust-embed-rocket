@@ -1,4 +1,4 @@
-# Rocket Embed Rocket
+# Rust Embed Rocket
 
 This crate provides a static file server for [Rocket](https://rocket.rs) backed by the [`rust-embed`](https://crates.io/crates/rust-embed) crate. This allows users to ship their frontend with their webserver.
 
