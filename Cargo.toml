@@ -1,5 +1,5 @@
 [package]
-name = "rocket-embed-serve"
+name = "rust-embed-rocket"
 version = "0.1.0"
 authors = ["gabriel"]
 edition = "2018"

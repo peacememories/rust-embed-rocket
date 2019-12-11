@@ -1,6 +1,6 @@
 use rocket;
-use rocket_embed_serve::Server;
 use rust_embed::RustEmbed;
+use rust_embed_rocket::Server;
 
 #[derive(RustEmbed)]
 #[folder = "examples/public/"]
