@@ -47,19 +47,14 @@ impl<T: RustEmbed> Clone for Server<T> {
 
 impl<T: RustEmbed + 'static> Handler for Server<T> {
     fn handle<'r>(&self, request: &'r Request, _data: Data) -> Outcome<'r> {
-        let segments_option = request
+        let path: PathBuf = request
             .get_segments(0)
-            .map(|s| s.map_err(|_| "Error occurred while parsing segments"));
-        let segments = segments_option.unwrap_or(Ok("".into()));
-        let path: PathBuf = segments.map_err(|e| Err(Status::new(400, e.into())))?;
+            .map(|s| s.map_err(|_| "Error occurred while parsing segments"))
+            .unwrap_or(Ok("".into()))
+            .map_err(|e| Err(Status::new(400, e.into())))?;
 
-        let path = if cfg!(feature = "index") {
-            println!("path: {:?}", path);
-            if path.is_dir() || path.to_str() == Some("") {
-                path.join("index.html")
-            } else {
-                path
-            }
+        let path = if cfg!(feature = "index") && (path.is_dir() || path.to_str() == Some("")) {
+            path.join("index.html")
         } else {
             path
         };
