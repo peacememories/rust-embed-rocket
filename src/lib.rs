@@ -59,8 +59,8 @@ impl<T: RustEmbed + 'static> Handler for Server<T> {
             path
         };
 
-        let file_content = <T as RustEmbed>::get(path.to_string_lossy().as_ref())
-            .ok_or(Err(Status::new(404, "File not found")))?;
+        let file_content =
+            <T as RustEmbed>::get(path.to_string_lossy().as_ref()).ok_or(Err(Status::NotFound))?;
         let content_type: ContentType = path
             .extension()
             .map(|x| x.to_string_lossy())
