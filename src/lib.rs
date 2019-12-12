@@ -1,3 +1,5 @@
+use futures::FutureExt;
+use rocket::handler::HandlerFuture;
 use rocket::handler::Outcome;
 use rocket::http::ContentType;
 use rocket::http::Method;
@@ -46,31 +48,35 @@ impl<T: RustEmbed> Clone for Server<T> {
 }
 
 impl<T: RustEmbed + 'static> Handler for Server<T> {
-    fn handle<'r>(&self, request: &'r Request, _data: Data) -> Outcome<'r> {
-        let path: PathBuf = request
-            .get_segments(0)
-            .map(|s| s.map_err(|_| "Error occurred while parsing segments"))
-            .unwrap_or(Ok("".into()))
-            .map_err(|e| Err(Status::new(400, e.into())))?;
+    fn handle<'r>(&self, request: &'r Request, _data: Data) -> HandlerFuture<'r> {
+        let future = async move {
+            let path: PathBuf = request
+                .get_segments(0)
+                .map(|s| s.map_err(|_| "Error occurred while parsing segments"))
+                .unwrap_or(Ok("".into()))
+                .map_err(|e| Status::new(400, e.into()))?;
 
-        let path = if cfg!(feature = "index") && (path.is_dir() || path.to_str() == Some("")) {
-            path.join("index.html")
-        } else {
-            path
-        };
+            let path = if cfg!(feature = "index") && (path.is_dir() || path.to_str() == Some("")) {
+                path.join("index.html")
+            } else {
+                path
+            };
 
-        let file_content =
-            <T as RustEmbed>::get(path.to_string_lossy().as_ref()).ok_or(Err(Status::NotFound))?;
-        let content_type: ContentType = path
-            .extension()
-            .map(|x| x.to_string_lossy())
-            .and_then(|x| ContentType::from_extension(&x))
-            .unwrap_or(ContentType::Plain);
-        Outcome::Success(
-            Content(content_type, file_content.into_owned())
+            let file_content =
+                <T as RustEmbed>::get(path.to_string_lossy().as_ref()).ok_or(Status::NotFound)?;
+            let content_type: ContentType = path
+                .extension()
+                .map(|x| x.to_string_lossy())
+                .and_then(|x| ContentType::from_extension(&x))
+                .unwrap_or(ContentType::Plain);
+            Ok(Content(content_type, file_content.into_owned())
                 .respond_to(request)
-                .map_err(|e| Err(e))?,
-        )
+                .await?)
+        };
+        Box::pin(future.map(|r| match r {
+            Ok(response) => Outcome::Success(response),
+            Err(status) => Outcome::Failure(status),
+        }))
     }
 }
 
