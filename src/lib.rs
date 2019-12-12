@@ -76,9 +76,13 @@ impl<T: RustEmbed + 'static> Handler for Server<T> {
 
 impl<T: RustEmbed + 'static> Into<Vec<Route>> for Server<T> {
     fn into(self) -> Vec<Route> {
-        vec![
-            Route::new(Method::Get, "/", self.clone()),
-            Route::new(Method::Get, "/<path..>", self),
-        ]
+        if cfg!(feature = "index") {
+            vec![
+                Route::new(Method::Get, "/", self.clone()),
+                Route::new(Method::Get, "/<path..>", self),
+            ]
+        } else {
+            vec![Route::new(Method::Get, "/<path..>", self.clone())]
+        }
     }
 }
