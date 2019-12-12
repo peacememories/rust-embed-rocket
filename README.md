@@ -34,7 +34,9 @@ fn main() {
 }
 ```
 
-## Features
+## Optional Features
+
+### Index
 
 There is currently one feature, `index`, which automatically redirects requests for directories to an `index.html` file within the directory.
 
