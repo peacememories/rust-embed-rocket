@@ -17,12 +17,25 @@ pub struct Server<T: RustEmbed> {
 }
 
 impl<T: RustEmbed> Server<T> {
+    /// Create a new [`Server`](Server) by using a generic type that implements [`RustEmbed`](::rust_embed::RustEmbed).
+    ///
+    /// Example:
+    /// ```rust
+    /// let server = Server::<Assets>::new();
+    /// let server: Server<Assets> = Server::new();
+    /// ```
     pub fn new() -> Self {
         Server { tag: PhantomData }
     }
 
+    /// Convenience function around [`Server::new`](Server::new). It takes an argument, but only uses its type information, so no overhead is introduced.
+    ///
+    /// Example:
+    /// ```rust
+    /// let server = Server::from(Assets);
+    /// ```
     pub fn from(_assets: T) -> Self {
-        Server { tag: PhantomData }
+        Self::new()
     }
 }
 
