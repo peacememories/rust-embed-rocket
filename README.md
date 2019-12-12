@@ -12,7 +12,7 @@ Since the crate is currently not hosted on [crates.io](https://crates.io), you n
 #Cargo.toml
 #...
 [dependencies]
-rocket-embed-rocket = {git = "https://github.com/peacememories/rust-embed-rocket"}
+rust-embed-rocket = {git = "https://github.com/peacememories/rust-embed-rocket"}
 #...
 ```
 
