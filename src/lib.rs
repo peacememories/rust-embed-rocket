@@ -14,6 +14,18 @@ use std::path::PathBuf;
 
 pub struct Server<T: RustEmbed> {
     tag: PhantomData<fn(T)>,
+    config: Config,
+}
+
+#[derive(Clone)]
+pub struct Config {
+    pub rank: isize,
+}
+
+impl Default for Config {
+    fn default() -> Config {
+        Config { rank: -2 }
+    }
 }
 
 impl<T: RustEmbed> Server<T> {
@@ -24,24 +36,44 @@ impl<T: RustEmbed> Server<T> {
     /// let server = Server::<Assets>::new();
     /// let server: Server<Assets> = Server::new();
     /// ```
+    #[deprecated]
     pub fn new() -> Self {
-        Server { tag: PhantomData }
+        Server {
+            tag: PhantomData,
+            config: Default::default(),
+        }
     }
 
-    /// Convenience function around [`Server::new`](Server::new). It takes an argument, but only uses its type information, so no overhead is introduced.
+    /// Convenience function around [`Server::from_config`](Server::new). It takes an argument, but only uses its type information, so no overhead is introduced.
     ///
     /// Example:
     /// ```rust
     /// let server = Server::from(Assets);
     /// ```
-    pub fn from(_assets: T) -> Self {
-        Self::new()
+    pub fn from(assets: T) -> Self {
+        Self::from_config(assets, Default::default())
+    }
+
+    /// Create a new [`Server`](Server) configured with the provided [`Config`](Config).
+    ///
+    /// Example:
+    /// ```rust
+    /// let server = Server::from_config(Assets, Config {rank: 2});
+    /// ```
+    pub fn from_config(_assets: T, config: Config) -> Self {
+        Self {
+            tag: PhantomData,
+            config: config,
+        }
     }
 }
 
 impl<T: RustEmbed> Clone for Server<T> {
     fn clone(&self) -> Self {
-        Server { tag: PhantomData }
+        Server {
+            tag: PhantomData,
+            config: self.config.clone(),
+        }
     }
 }
 
@@ -78,11 +110,16 @@ impl<T: RustEmbed + 'static> Into<Vec<Route>> for Server<T> {
     fn into(self) -> Vec<Route> {
         if cfg!(feature = "index") {
             vec![
-                Route::new(Method::Get, "/", self.clone()),
-                Route::new(Method::Get, "/<path..>", self),
+                Route::ranked(self.config.rank, Method::Get, "/", self.clone()),
+                Route::ranked(self.config.rank, Method::Get, "/<path..>", self),
             ]
         } else {
-            vec![Route::new(Method::Get, "/<path..>", self.clone())]
+            vec![Route::ranked(
+                self.config.rank,
+                Method::Get,
+                "/<path..>",
+                self.clone(),
+            )]
         }
     }
 }
