@@ -40,11 +40,21 @@ fn main() {
 
 The Rocket rank (see [here](https://rocket.rs/v0.4/guide/requests/#forwarding)) can be set by changing the `rank` option supplied to `from_config`.
 
-Default: 0
+Default: `0`
 
 ### Serve Index
 
 It is common to want a url like `/foo` to serve the file `/foo/index.html`. This can be done by enabling the boolean `serve_index` in the config.
+
+Default: `false`
+
+### SPA Mode
+
+When SPA mode is enabled, instead of serving a 404 error if a file is not found, the server will return `index.html`. This is useful for applications that do routing on the client side and change the url using the history api.
+
+When doing this without SPA mode enabled and reloading the page, a 404 is normally shown.
+
+Default: `false`
 
 ## Feedback & Contributions
 

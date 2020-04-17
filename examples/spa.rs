@@ -14,8 +14,8 @@ fn main() {
                 Assets,
                 Config {
                     rank: 0,
-                    serve_index: true,
-                    spa: false,
+                    serve_index: false,
+                    spa: true,
                 },
             ),
         )

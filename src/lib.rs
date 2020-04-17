@@ -21,6 +21,7 @@ pub struct Server<T: RustEmbed> {
 pub struct Config {
     pub rank: isize,
     pub serve_index: bool,
+    pub spa: bool,
 }
 
 impl Default for Config {
@@ -28,6 +29,7 @@ impl Default for Config {
         Config {
             rank: -2,
             serve_index: false,
+            spa: false,
         }
     }
 }
@@ -95,13 +97,23 @@ impl<T: RustEmbed + 'static> Handler for Server<T> {
             path
         };
 
-        let file_content =
-            <T as RustEmbed>::get(path.to_string_lossy().as_ref()).ok_or(Err(Status::NotFound))?;
         let content_type: ContentType = path
             .extension()
             .map(|x| x.to_string_lossy())
             .and_then(|x| ContentType::from_extension(&x))
             .unwrap_or(ContentType::Plain);
+
+        let maybe_file_content = <T as RustEmbed>::get(path.to_string_lossy().as_ref());
+
+        let (file_content, content_type) = match (self.config.spa, maybe_file_content) {
+            (_, Some(file_content)) => (file_content, content_type),
+            (true, None) => (
+                <T as RustEmbed>::get("index.html").ok_or(Err(Status::NotFound))?,
+                ContentType::HTML,
+            ),
+            (false, None) => return Outcome::Failure(Status::NotFound),
+        };
+
         Outcome::Success(
             Content(content_type, file_content.into_owned())
                 .respond_to(request)
