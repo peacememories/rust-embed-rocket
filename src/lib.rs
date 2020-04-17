@@ -20,11 +20,15 @@ pub struct Server<T: RustEmbed> {
 #[derive(Clone)]
 pub struct Config {
     pub rank: isize,
+    pub serve_index: bool,
 }
 
 impl Default for Config {
     fn default() -> Config {
-        Config { rank: -2 }
+        Config {
+            rank: -2,
+            serve_index: false,
+        }
     }
 }
 
@@ -58,7 +62,7 @@ impl<T: RustEmbed> Server<T> {
     ///
     /// Example:
     /// ```rust
-    /// let server = Server::from_config(Assets, Config {rank: 2});
+    /// let server = Server::from_config(Assets, Config {rank: 2, serve_index: false});
     /// ```
     pub fn from_config(_assets: T, config: Config) -> Self {
         Self {
@@ -85,7 +89,7 @@ impl<T: RustEmbed + 'static> Handler for Server<T> {
             .unwrap_or(Ok("".into()))
             .map_err(|e| Err(Status::new(400, e.into())))?;
 
-        let path = if cfg!(feature = "index") && (path.is_dir() || path.to_str() == Some("")) {
+        let path = if self.config.serve_index && (path.is_dir() || path.to_str() == Some("")) {
             path.join("index.html")
         } else {
             path
@@ -108,7 +112,7 @@ impl<T: RustEmbed + 'static> Handler for Server<T> {
 
 impl<T: RustEmbed + 'static> Into<Vec<Route>> for Server<T> {
     fn into(self) -> Vec<Route> {
-        if cfg!(feature = "index") {
+        if self.config.serve_index {
             vec![
                 Route::ranked(self.config.rank, Method::Get, "/", self.clone()),
                 Route::ranked(self.config.rank, Method::Get, "/<path..>", self),

@@ -34,21 +34,17 @@ fn main() {
 }
 ```
 
-## Optional Features
+## Configuration Options
 
-### Index
+### Rank
 
-There is currently one feature, `index`, which automatically redirects requests for directories to an `index.html` file within the directory.
+The Rocket rank (see [here](https://rocket.rs/v0.4/guide/requests/#forwarding)) can be set by changing the `rank` option supplied to `from_config`.
 
-Enable it by adding it to the `features` list in your `Cargo.toml`:
+Default: 0
 
-```toml
-#Cargo.toml
-#...
-[dependencies]
-rust-embed-rocket = {git = "https://github.com/peacememories/rust-embed-rocket", features=["index"]}
-#...
-```
+### Serve Index
+
+It is common to want a url like `/foo` to serve the file `/foo/index.html`. This can be done by enabling the boolean `serve_index` in the config.
 
 ## Feedback & Contributions
 
