@@ -82,7 +82,7 @@ impl<T: RustEmbed> Clone for Server<T> {
 }
 
 impl<T: RustEmbed + 'static> Handler for Server<T> {
-    fn handle<'r>(&self, request: &'r Request, _data: Data) -> Outcome<'r> {
+    fn handle<'r>(&self, request: &'r Request, data: Data) -> Outcome<'r> {
         let path: PathBuf = request
             .get_segments(0)
             .map(|s| s.map_err(|_| "Error occurred while parsing segments"))
@@ -96,7 +96,7 @@ impl<T: RustEmbed + 'static> Handler for Server<T> {
         };
 
         let file_content =
-            <T as RustEmbed>::get(path.to_string_lossy().as_ref()).ok_or(Err(Status::NotFound))?;
+            <T as RustEmbed>::get(path.to_string_lossy().as_ref()).ok_or(Ok(data))?;
         let content_type: ContentType = path
             .extension()
             .map(|x| x.to_string_lossy())
