@@ -40,11 +40,13 @@ fn main() {
 
 The Rocket rank (see [here](https://rocket.rs/v0.4/guide/requests/#forwarding)) can be set by changing the `rank` option supplied to `from_config`.
 
-Default: 0
+Default: `0`
 
 ### Serve Index
 
 It is common to want a url like `/foo` to serve the file `/foo/index.html`. This can be done by enabling the boolean `serve_index` in the config.
+
+Default: `false`
 
 ## Feedback & Contributions
 
